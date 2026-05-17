@@ -2,167 +2,80 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RetroHub Web - Émulateur Multi-Consoles Pro</title>
-    <!-- Tailwind CSS pour le design pro -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NotSteam OS</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style>
-        #game-container { width: 100%; height: 600px; max-height: 75vh; }
-        #emulator { width: 100%; height: 100%; }
-    </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col justify-between font-sans">
+<body class="deck-bg text-white font-sans overflow-hidden select-none">
 
-    <!-- HEADER -->
-    <header class="p-6 bg-gray-900 border-b border-gray-800 text-center shadow-lg">
-        <h1 class="text-4xl font-extrabold tracking-wider bg-gradient-to-r from-red-500 via-blue-500 to-yellow-500 bg-clip-text text-transparent">
-            RETROHUB WEB
-        </h1>
-        <p class="text-xs text-gray-400 mt-2 uppercase tracking-widest">Studio d'émulation multiplateforme (PC / Mobile)</p>
+    <header class="flex justify-between items-center px-12 py-6">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+            <h1 class="text-xl font-black tracking-tighter italic">NotSteam</h1>
+        </div>
+        <div id="clock" class="text-sm font-bold opacity-60">00:00</div>
     </header>
 
-    <!-- CONTENU PRINCIPAL -->
-    <main class="flex-grow container mx-auto px-4 py-8 max-w-6xl">
+    <main id="library-screen" class="px-12 mt-4">
+        <h2 class="text-2xl font-bold mb-6 opacity-90">Ma Bibliothèque</h2>
         
-        <!-- ÉTAPE 1 : CHOIX DE LA CONSOLE -->
-        <section id="console-selection" class="mb-10">
-            <h2 class="text-xl font-semibold mb-6 text-center text-gray-300">1. Choisissez votre console :</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                
-                <!-- Nintendo NES -->
-                <button onclick="selectConsole('nes', 'Nintendo NES', 'border-red-600 bg-red-950/40')" class="console-card p-4 rounded-xl border border-gray-800 bg-gray-900 hover:border-red-500 transition-all text-center group cursor-pointer">
-                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🕹️</div>
-                    <span class="font-bold block text-sm">NES</span>
-                    <span class="text-xxs text-gray-500">8-Bit</span>
-                </button>
-
-                <!-- Super Nintendo -->
-                <button onclick="selectConsole('snes', 'Super Nintendo', 'border-purple-600 bg-purple-950/40')" class="console-card p-4 rounded-xl border border-gray-800 bg-gray-900 hover:border-purple-500 transition-all text-center group cursor-pointer">
-                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🎮</div>
-                    <span class="font-bold block text-sm">Super Nintendo</span>
-                    <span class="text-xxs text-gray-500">16-Bit</span>
-                </button>
-
-                <!-- Sega Megadrive -->
-                <button onclick="selectConsole('segaMD', 'Sega Megadrive', 'border-blue-600 bg-blue-950/40')" class="console-card p-4 rounded-xl border border-gray-800 bg-gray-900 hover:border-blue-500 transition-all text-center group cursor-pointer">
-                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🦔</div>
-                    <span class="font-bold block text-sm">Megadrive / Genesis</span>
-                    <span class="text-xxs text-gray-500">16-Bit</span>
-                </button>
-
-                <!-- Commodore Amiga -->
-                <button onclick="selectConsole('amiga', 'Amiga', 'border-orange-600 bg-orange-950/40')" class="console-card p-4 rounded-xl border border-gray-800 bg-gray-900 hover:border-orange-500 transition-all text-center group cursor-pointer">
-                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🖥️</div>
-                    <span class="font-bold block text-sm">Amiga (500/1200)</span>
-                    <span class="text-xxs text-gray-500">Ordinateur Retro</span>
-                </button>
-
-                <!-- Sony PlayStation 1 -->
-                <button onclick="selectConsole('psx', 'PlayStation 1', 'border-gray-400 bg-gray-800/40')" class="console-card p-4 rounded-xl border border-gray-800 bg-gray-900 hover:border-gray-400 transition-all text-center group cursor-pointer">
-                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">💿</div>
-                    <span class="font-bold block text-sm">PlayStation</span>
-                    <span class="text-xxs text-gray-500">32-Bit</span>
-                </button>
-
-            </div>
-        </section>
-
-        <!-- ÉTAPE 2 : CHARGEMENT DE LA ROM & ZONE DE JEU -->
-        <section id="player-section" class="hidden opacity-0 transition-opacity duration-500 max-w-4xl mx-auto">
+        <div class="flex gap-4 items-start overflow-x-auto pb-12 scrollbar-none" id="main-carousel">
             
-            <div class="bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
-                
-                <!-- Entête dynamique du lecteur -->
-                <div id="player-header" class="p-4 bg-gray-850 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-gray-800">
-                    <div>
-                        <span id="current-console-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase mr-2"></span>
-                        <span class="text-sm text-gray-400">Insérez votre fichier de jeu :</span>
-                    </div>
-                    <input type="file" id="rom-file" class="block text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700 cursor-pointer"/>
-                </div>
-
-                <!-- Zone Émulateur -->
-                <div id="game-container" class="bg-black flex items-center justify-center text-gray-500 relative">
-                    <div id="placeholder-text" class="text-center p-6">
-                        <p class="text-lg font-medium text-gray-400">Veuillez sélectionner un fichier ROM pour démarrer la partie.</p>
-                        <p class="text-xs text-gray-600 mt-2" id="format-hint"></p>
-                    </div>
-                    <div id="emulator"></div>
-                </div>
-
-            </div>
-
-            <!-- Bouton pour changer de console -->
-            <div class="text-center mt-4">
-                <button onclick="resetHub()" class="text-sm text-gray-500 hover:text-white underline cursor-pointer">
-                    ↩ Choisir une autre console
+            <div class="flex flex-col gap-4">
+                <button class="tile-main focused" 
+                        data-core="snes" 
+                        data-path="snes/game.sfc" 
+                        data-name="Super Nintendo" 
+                        data-focusable="true">
+                    <div class="tile-art snes-art"></div>
+                    <div class="verified-tag">✅ NotSteam Verified</div>
                 </button>
+                <div class="tile-meta">
+                    <h3 class="text-2xl font-bold">Super Nintendo</h3>
+                    <p class="text-green-400 text-[10px] font-black uppercase tracking-widest mt-1">▶ Prêt à jouer</p>
+                </div>
             </div>
-        </section>
 
+            <button class="tile-sub" data-core="nes" data-path="nes/game.nes" data-name="Nintendo NES" data-focusable="true">
+                <div class="tile-art nes-art"></div>
+            </button>
+
+            <button class="tile-sub" data-core="segaMD" data-path="megadrive/game.md" data-name="Sega Megadrive" data-focusable="true">
+                <div class="tile-art sega-art"></div>
+            </button>
+
+            <button class="tile-sub" data-core="amiga" data-path="amiga/game.adf" data-name="Amiga 500" data-focusable="true">
+                <div class="tile-art amiga-art"></div>
+            </button>
+
+            <button class="tile-sub" data-core="psx" data-path="psx/game.chd" data-name="PlayStation 1" data-focusable="true">
+                <div class="tile-art ps1-art"></div>
+            </button>
+
+        </div>
     </main>
 
-    <!-- SCRIPT DE LOGIQUE -->
-    <script>
-        let selectedCore = '';
-        const formats = {
-            nes: '.nes',
-            snes: '.sfc, .smc',
-            segaMD: '.md, .bin, .smd',
-            amiga: '.adf',
-            psx: '.bin, .cue, .iso, .chd'
-        };
+    <section id="player-screen" class="hidden fixed inset-0 bg-black z-50 flex flex-col">
+        <div class="h-14 flex justify-between items-center px-8 bg-[#10151e] border-b border-white/5">
+            <span id="target-name" class="font-black text-blue-400 uppercase text-xs tracking-widest"></span>
+            <button onclick="location.reload()" class="bg-red-600 px-5 py-1.5 rounded text-[10px] font-black uppercase">Fermer (ESC)</button>
+        </div>
+        <div id="emu-box" class="flex-grow"></div>
+    </section>
 
-        function selectConsole(core, name, themeClass) {
-            selectedCore = core;
-            
-            // Gestion de l'affichage des sections
-            document.getElementById('console-selection').classList.add('hidden');
-            const playerSection = document.getElementById('player-section');
-            playerSection.classList.remove('hidden');
-            setTimeout(() => playerSection.classList.add('opacity-100'), 50);
-
-            // Mise à jour du Badge de la console actuelle
-            const badge = document.getElementById('current-console-badge');
-            badge.innerText = name;
-            badge.className = `px-3 py-1 rounded-full text-xs font-bold uppercase mr-2 ${themeClass}`;
-
-            // Indication des formats acceptés
-            document.getElementById('format-hint').innerText = `Formats acceptés : ${formats[core]}`;
-            document.getElementById('rom-file').accept = formats[core];
-        }
-
-        document.getElementById('rom-file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file || !selectedCore) return;
-
-            // Cacher le texte d'attente
-            document.getElementById('placeholder-text').style.display = 'none';
-
-            // Configuration EmulatorJS universelle
-            window.EJS_player = '#emulator';
-            window.EJS_core = selectedCore; 
-            window.EJS_gameUrl = URL.createObjectURL(file);
-            
-            // Accès au CDN stable pour télécharger le système d'exploitation de la console choisie
-            window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/'; 
-
-            // Injection et démarrage automatique du moteur
-            const script = document.createElement('script');
-            script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-            document.head.appendChild(script);
-        });
-
-        function resetHub() {
-            // Recharger simplement la page pour nettoyer proprement la mémoire WebAssembly de l'émulateur
-            window.location.reload();
-        }
-    </script>
-
-    <!-- FOOTER -->
-    <footer class="p-6 bg-gray-900 border-t border-gray-850 text-center text-xs text-gray-600">
-        <p>Projet Portfolio Professionnel — Hébergé de manière statique et sécurisée sur GitHub Pages.</p>
+    <footer class="fixed bottom-0 w-full h-14 bg-black/80 backdrop-blur-md px-10 flex justify-between items-center text-[10px] font-bold text-gray-400 border-t border-white/5">
+        <div class="flex gap-4">
+            <span class="bg-white/10 px-3 py-1 rounded-full text-white tracking-tighter">NOTSTEAM</span>
+            <span class="flex items-center">MENU</span>
+        </div>
+        <div class="flex gap-6 items-center">
+            <span>☰ OPTIONS</span>
+            <span><b class="btn-icon">A</b> SELECT</span>
+            <span><b class="btn-icon">B</b> BACK</span>
+        </div>
     </footer>
 
+    <script src="script.js"></script>
 </body>
 </html>
