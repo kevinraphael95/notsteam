@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>NotSteam OS</title>
+    <title>NotSteam OS - Retro Station</title>
     <style>
-        :root { --bg: #0a0f14; --steam-blue: #1b2838; --sky: #66c0f4; }
+        :root { --bg: #0a0f14; --steam-blue: #1b2838; --sky: #66c0f4; --focus: #ffffff; }
         
         body { 
             margin: 0; background: radial-gradient(circle at 50% 30%, #1c2e4a 0%, var(--bg) 80%);
@@ -13,41 +13,41 @@
         }
 
         /* HEADER */
-        .top-bar { display: flex; justify-content: space-between; padding: 25px 50px; font-weight: bold; }
+        .top-bar { display: flex; justify-content: space-between; padding: 20px 40px; font-weight: bold; background: rgba(0,0,0,0.3); }
         .text-blue { color: var(--sky); }
 
         /* BIBLIOTHÈQUE */
-        .shelf { padding-left: 50px; margin-top: 20px; }
-        .section-label { font-size: 12px; letter-spacing: 2px; opacity: 0.6; text-transform: uppercase; }
-        .game-carousel { display: flex; gap: 20px; overflow-x: auto; padding: 20px 0; scrollbar-width: none; }
+        .shelf { padding: 40px; }
+        .section-label { font-size: 12px; letter-spacing: 2px; opacity: 0.6; text-transform: uppercase; margin-bottom: 20px; }
+        .game-carousel { display: flex; gap: 25px; overflow-x: auto; padding: 20px 0; scrollbar-width: none; }
 
         .game-card {
-            min-width: 220px; height: 320px; background: #1a222d; border-radius: 4px;
-            border: 3px solid transparent; transition: 0.2s; cursor: pointer;
-            display: flex; align-items: flex-end; padding: 15px; position: relative;
-            background-size: cover; background-position: center;
+            min-width: 200px; height: 300px; background: #1a222d; border-radius: 4px;
+            border: 3px solid transparent; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; display: flex; align-items: flex-end; padding: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
-        .game-card.featured { min-width: 500px; }
+        .game-card.featured { min-width: 450px; }
 
-        /* CADRE BLANC STEAM DECK */
+        /* FOCUS STYLE (CLAVIER & MANETTE) */
         .game-card:focus, .game-card.active {
-            border-color: white;
-            box-shadow: 0 0 25px rgba(255,255,255,0.3);
-            transform: scale(1.03);
+            border-color: var(--focus);
+            box-shadow: 0 0 30px rgba(255,255,255,0.4);
+            transform: scale(1.05);
             outline: none;
         }
 
-        /* L'ÉMULATEUR (OVERLAY) */
-        #emulator-overlay { position: fixed; inset: 0; background: black; z-index: 100; display: flex; flex-direction: column; }
-        .emu-header { background: var(--steam-blue); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--sky); }
+        /* L'ÉMULATEUR */
+        #emulator-overlay { position: fixed; inset: 0; background: black; z-index: 1000; display: flex; flex-direction: column; }
+        .emu-header { background: var(--steam-blue); padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--sky); }
         #display { flex-grow: 1; width: 100%; height: 100%; }
         .hidden { display: none !important; }
 
         /* FOOTER */
         .bottom-bar {
             position: fixed; bottom: 0; width: 100%; height: 60px;
-            background: rgba(0,0,0,0.85); display: flex; justify-content: space-between;
+            background: rgba(0,0,0,0.9); display: flex; justify-content: space-between;
             align-items: center; padding: 0 40px; font-size: 11px; font-weight: bold; box-sizing: border-box;
         }
         .btn-hint { background: white; color: black; border-radius: 50%; padding: 2px 7px; margin-right: 5px; }
@@ -62,7 +62,7 @@
 
     <main id="main-view">
         <section class="shelf">
-            <h2 class="section-label">Récents</h2>
+            <h2 class="section-label">Récemment ajouté au dépôt</h2>
             <div class="game-carousel" id="game-list">
                 </div>
         </section>
@@ -70,41 +70,45 @@
 
     <div id="emulator-overlay" class="hidden">
         <div class="emu-header">
-            <span id="playing-title">Chargement...</span>
-            <button onclick="location.reload()" style="background:#e11d48; color:white; border:none; padding:5px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">QUITTER (ESC)</button>
+            <span id="playing-title">Initialisation...</span>
+            <button onclick="location.reload()" style="background:#e11d48; color:white; border:none; padding:8px 20px; border-radius:4px; font-weight:bold; cursor:pointer;">QUITTER (ESC)</button>
         </div>
         <div id="display"></div>
     </div>
 
     <footer class="bottom-bar">
-        <div><span style="background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:20px;">STEAM</span> MENU</div>
+        <div><span style="background:rgba(255,255,255,0.1); padding:5px 12px; border-radius:20px; margin-right: 10px;">STEAM</span> MENU</div>
         <div>
-            <span><b class="btn-hint">A</b> SÉLECTIONNER</span> &nbsp;&nbsp;
+            <span><b class="btn-hint">A</b> LANCER</span> &nbsp;&nbsp;
             <span><b class="btn-hint">B</b> RETOUR</span>
         </div>
     </footer>
 
     <script>
-        // 1. TA LISTE DE JEUX (Vérifie bien les noms des fichiers .nes)
+        // --- CONFIGURATION ---
+        // Remplace 'kevinraphael95' par ton nom d'utilisateur exact si besoin
+        const GITHUB_BASE = "https://raw.githubusercontent.com/kevinraphael95/notsteam/main/";
+
         const ROMS = [
-            { title: "All Hell Unleashed", core: "nes", path: "nes/All Hell Unleashed.nes", featured: true },
-            { title: "Backwards Quest", core: "nes", path: "nes/BackwardsQuest v18.nes" },
-            { title: "Mario Poker", core: "nes", path: "nes/Mario's Poker War (Unl).nes" },
-            { title: "Tower of Shlasca", core: "nes", path: "nes/Tower of Shlasca v1.0.nes" }
+            { title: "All Hell Unleashed", core: "nes", file: "nes/All Hell Unleashed.nes", featured: true },
+            { title: "Backwards Quest", core: "nes", file: "nes/BackwardsQuest v18.nes" },
+            { title: "Tower of Shlasca", core: "nes", file: "nes/Tower of Shlasca v1.0.nes" },
+            { title: "Mario Poker", core: "nes", file: "nes/Mario's Poker War (Unl).nes" }
         ];
 
         let currentIndex = 0;
-        const gameList = document.getElementById('game-list');
+        let canNavigate = true;
 
-        // 2. CRÉATION DES CARTES
-        function init() {
+        // --- BIBLIOTHÈQUE ---
+        function initLibrary() {
+            const list = document.getElementById('game-list');
             ROMS.forEach((game, i) => {
                 const card = document.createElement('div');
                 card.className = `game-card ${game.featured ? 'featured' : ''}`;
                 card.tabIndex = 0;
-                card.innerHTML = `<div style="font-weight:bold; text-shadow:2px 2px 4px black;">${game.title}</div>`;
+                card.innerHTML = `<div style="font-weight:bold; font-size:1.2rem;">${game.title}</div>`;
                 card.onclick = () => launch(game);
-                gameList.appendChild(card);
+                list.appendChild(card);
             });
             updateFocus();
         }
@@ -115,34 +119,37 @@
             if(cards[currentIndex]) cards[currentIndex].focus();
         }
 
-        // 3. LOGIQUE MANETTE
+        // --- CONTRÔLES (MANETTE & CLAVIER) ---
+        window.addEventListener("keydown", (e) => {
+            if (!canNavigate) return;
+            if (e.key === "ArrowRight" && currentIndex < ROMS.length - 1) { currentIndex++; updateFocus(); }
+            if (e.key === "ArrowLeft" && currentIndex > 0) { currentIndex--; updateFocus(); }
+            if (e.key === "Enter") launch(ROMS[currentIndex]);
+        });
+
         setInterval(() => {
             const gp = navigator.getGamepads()[0];
-            if (!gp) return;
+            if (!gp || !canNavigate) return;
 
-            // D-Pad ou Joystick Gauche
             if (gp.axes[0] > 0.5 || gp.buttons[15].pressed) { // Droite
                 if (currentIndex < ROMS.length - 1) { currentIndex++; updateFocus(); }
             } else if (gp.axes[0] < -0.5 || gp.buttons[14].pressed) { // Gauche
                 if (currentIndex > 0) { currentIndex--; updateFocus(); }
             }
+            if (gp.buttons[0].pressed) launch(ROMS[currentIndex]); // Bouton A
+        }, 180);
 
-            // Bouton A pour lancer
-            if (gp.buttons[0].pressed) launch(ROMS[currentIndex]);
-        }, 150);
-
-        // 4. LANCEMENT ÉMULATEUR
+        // --- ÉMULATION ---
         function launch(game) {
+            canNavigate = false;
             document.getElementById('emulator-overlay').classList.remove('hidden');
-            document.getElementById('playing-title').innerText = "Lecture : " + game.title;
+            document.getElementById('playing-title').innerText = "NOTSTEAM : " + game.title;
 
-            // Config
             window.EJS_player = '#display';
             window.EJS_core = game.core;
-            window.EJS_gameUrl = game.path;
+            window.EJS_gameUrl = GITHUB_BASE + game.file; // URL ABSOLUE
             window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
 
-            // Chargement du script après la config pour éviter l'écran noir
             const s = document.createElement('script');
             s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
             document.head.appendChild(s);
@@ -153,7 +160,7 @@
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
         }, 1000);
 
-        init();
+        initLibrary();
     </script>
 </body>
 </html>
