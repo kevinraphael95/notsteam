@@ -1,64 +1,94 @@
-/* Dégradé Steam Deck Officiel */
-.deck-bg {
-    background: radial-gradient(circle at 50% 30%, #1c2e4a 0%, #111823 60%, #0a0f18 100%);
+:root {
+    --steam-blue: #1b2838;
+    --steam-light-blue: #66c0f4;
+    --steam-dark: #0f141a;
+    --accent-gradient: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+    --card-bg: rgba(255, 255, 255, 0.03);
 }
 
-.scrollbar-none::-webkit-scrollbar { display: none; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* Tuiles de l'interface */
-.tile-main {
-    width: 540px;
-    height: 310px;
-    background: #1a222d;
-    border-radius: 4px;
-    border: 3px solid transparent;
-    position: relative;
+body, html {
+    height: 100%;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: white;
+    background: #0a0f14;
     overflow: hidden;
-    transition: 0.15s ease-out;
 }
 
-.tile-sub {
-    width: 200px;
-    height: 310px;
-    background: #1a222d;
-    border: 3px solid transparent;
-    border-radius: 4px;
-    transition: 0.15s ease-out;
+/* Background Steam Deck */
+.steam-bg {
+    background: radial-gradient(circle at 50% 0%, #1c2e4a 0%, #0a0f14 70%);
 }
 
-/* LE FOCUS STEAM (Cadre blanc lumineux) */
-[data-focusable="true"].focused {
-    border-color: #ffffff;
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-    transform: scale(1.03);
-    z-index: 10;
+.main-header {
+    height: 80px;
+    padding: 0 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.2);
+}
+
+.logo { font-size: 24px; font-weight: 900; letter-spacing: -1px; font-style: italic; }
+.logo-accent { color: var(--steam-light-blue); }
+
+/* Grid de Jeux */
+.content-wrapper { padding: 20px 50px; height: calc(100vh - 140px); }
+.game-grid {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 20px 0 40px 0;
+}
+
+.card {
+    min-width: 220px;
+    height: 380px;
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+    position: relative;
+}
+
+.card-featured { min-width: 500px; }
+
+.card:hover, .card:focus {
+    transform: translateY(-10px) scale(1.02);
+    border-color: white;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     outline: none;
 }
 
-.tile-art { width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0.7; }
+.card-banner { height: 75%; width: 100%; background: #16202d; border-radius: 8px 8px 0 0; }
+.snes-bg { background: linear-gradient(45deg, #3a1c71, #d76d77); }
+.nes-bg { background: linear-gradient(45deg, #232526, #414345); }
+.sega-bg { background: linear-gradient(45deg, #1e3c72, #2a5298); }
+.psx-bg { background: linear-gradient(45deg, #000000, #434343); }
 
-/* Couleurs de fallback pour les dossiers */
-.snes-art { background-color: #3b2b85; }
-.nes-art { background-color: #852b2b; }
-.sega-art { background-color: #2b4f85; }
-.amiga-art { background-color: #855f2b; }
-.ps1-art { background-color: #4a4a4a; }
+.card-info { padding: 15px; }
+.system-tag { font-size: 10px; font-weight: 800; color: var(--steam-light-blue); text-transform: uppercase; }
+.card-info h3 { font-size: 18px; margin-top: 5px; }
 
-.verified-tag {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    background: #2b92ff;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 900;
+/* Responsive Mobile */
+@media (max-width: 768px) {
+    .main-header { padding: 0 20px; }
+    .content-wrapper { padding: 10px 20px; }
+    .card { min-width: 160px; height: 280px; }
+    .card-featured { min-width: 280px; }
+    .game-grid { overflow-x: scroll; -webkit-overflow-scrolling: touch; }
+    .controls-hint { display: none; }
 }
 
-.btn-icon {
-    background: white;
-    color: black;
-    padding: 0 5px;
-    border-radius: 50%;
-    margin-right: 4px;
-}
+/* Player View */
+.view.hidden { display: none; }
+.player-container { position: fixed; inset: 0; background: black; z-index: 1000; }
+.player-header { height: 60px; background: #111; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-size: 12px; font-weight: bold; }
+.close-btn { background: #e11d48; border: none; color: white; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+
+/* Footer */
+.main-footer { height: 60px; background: rgba(0,0,0,0.4); display: flex; justify-content: space-between; align-items: center; padding: 0 50px; font-size: 11px; }
+.key-hint b { background: white; color: black; border-radius: 50%; padding: 0 5px; margin-right: 5px; }
