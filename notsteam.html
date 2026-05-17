@@ -3,77 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NotSteam OS</title>
+    <title>NotSteam | Premium Retro Station</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="deck-bg text-white font-sans overflow-hidden select-none">
+<body class="steam-bg">
 
-    <header class="flex justify-between items-center px-12 py-6">
-        <div class="flex items-center gap-3">
-            <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-            <h1 class="text-xl font-black tracking-tighter italic">NotSteam</h1>
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <header class="main-header">
+        <div class="logo">
+            <span class="logo-accent">NOT</span>STEAM
         </div>
-        <div id="clock" class="text-sm font-bold opacity-60">00:00</div>
+        <div id="clock" class="clock">00:00</div>
     </header>
 
-    <main id="library-screen" class="px-12 mt-4">
-        <h2 class="text-2xl font-bold mb-6 opacity-90">Ma Bibliothèque</h2>
-        
-        <div class="flex gap-4 items-start overflow-x-auto pb-12 scrollbar-none" id="main-carousel">
-            
-            <div class="flex flex-col gap-4">
-                <button class="tile-main focused" 
-                        data-core="snes" 
-                        data-path="snes/game.sfc" 
-                        data-name="Super Nintendo" 
-                        data-focusable="true">
-                    <div class="tile-art snes-art"></div>
-                    <div class="verified-tag">✅ NotSteam Verified</div>
-                </button>
-                <div class="tile-meta">
-                    <h3 class="text-2xl font-bold">Super Nintendo</h3>
-                    <p class="text-green-400 text-[10px] font-black uppercase tracking-widest mt-1">▶ Prêt à jouer</p>
-                </div>
+    <main class="content-wrapper">
+        <section id="library-view" class="view">
+            <div class="section-title">
+                <h2>MA BIBLIOTHÈQUE</h2>
+                <div class="status-badge">ONLINE</div>
             </div>
 
-            <button class="tile-sub" data-core="nes" data-path="nes/game.nes" data-name="Nintendo NES" data-focusable="true">
-                <div class="tile-art nes-art"></div>
-            </button>
+            <div class="game-grid scrollbar-custom">
+                <div class="card card-featured" tabindex="0" data-core="snes" data-path="snes/game.sfc">
+                    <div class="card-banner snes-bg"></div>
+                    <div class="card-info">
+                        <span class="system-tag">Super Nintendo</span>
+                        <h3>Super Mario World</h3>
+                        <div class="verified">✓ Verified</div>
+                    </div>
+                </div>
 
-            <button class="tile-sub" data-core="segaMD" data-path="megadrive/game.md" data-name="Sega Megadrive" data-focusable="true">
-                <div class="tile-art sega-art"></div>
-            </button>
+                <div class="card" tabindex="0" data-core="nes" data-path="nes/game.nes">
+                    <div class="card-banner nes-bg"></div>
+                    <div class="card-info">
+                        <span class="system-tag">NES</span>
+                        <h3>8-Bit Classics</h3>
+                    </div>
+                </div>
 
-            <button class="tile-sub" data-core="amiga" data-path="amiga/game.adf" data-name="Amiga 500" data-focusable="true">
-                <div class="tile-art amiga-art"></div>
-            </button>
+                <div class="card" tabindex="0" data-core="segaMD" data-path="megadrive/game.md">
+                    <div class="card-banner sega-bg"></div>
+                    <div class="card-info">
+                        <span class="system-tag">Sega MD</span>
+                        <h3>Sonic Edition</h3>
+                    </div>
+                </div>
 
-            <button class="tile-sub" data-core="psx" data-path="psx/game.chd" data-name="PlayStation 1" data-focusable="true">
-                <div class="tile-art ps1-art"></div>
-            </button>
+                <div class="card" tabindex="0" data-core="psx" data-path="psx/game.chd">
+                    <div class="card-banner psx-bg"></div>
+                    <div class="card-info">
+                        <span class="system-tag">PS One</span>
+                        <h3>3D Masterpiece</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-        </div>
+        <section id="player-view" class="view hidden">
+            <div class="player-container">
+                <div class="player-header">
+                    <div id="active-game-info">Chargement...</div>
+                    <button class="close-btn" id="exit-btn">QUITTER</button>
+                </div>
+                <div id="emulator-target"></div>
+            </div>
+        </section>
     </main>
 
-    <section id="player-screen" class="hidden fixed inset-0 bg-black z-50 flex flex-col">
-        <div class="h-14 flex justify-between items-center px-8 bg-[#10151e] border-b border-white/5">
-            <span id="target-name" class="font-black text-blue-400 uppercase text-xs tracking-widest"></span>
-            <button onclick="location.reload()" class="bg-red-600 px-5 py-1.5 rounded text-[10px] font-black uppercase">Fermer (ESC)</button>
+    <footer class="main-footer">
+        <div class="controls-hint">
+            <span class="key-hint"><b>A</b> Sélectionner</span>
+            <span class="key-hint"><b>B</b> Retour</span>
         </div>
-        <div id="emu-box" class="flex-grow"></div>
-    </section>
-
-    <footer class="fixed bottom-0 w-full h-14 bg-black/80 backdrop-blur-md px-10 flex justify-between items-center text-[10px] font-bold text-gray-400 border-t border-white/5">
-        <div class="flex gap-4">
-            <span class="bg-white/10 px-3 py-1 rounded-full text-white tracking-tighter">NOTSTEAM</span>
-            <span class="flex items-center">MENU</span>
-        </div>
-        <div class="flex gap-6 items-center">
-            <span>☰ OPTIONS</span>
-            <span><b class="btn-icon">A</b> SELECT</span>
-            <span><b class="btn-icon">B</b> BACK</span>
-        </div>
+        <div class="version">v2.0.1 - PRO EDITION</div>
     </footer>
 
     <script src="script.js"></script>
