@@ -4,18 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>NotSteam OS</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --bg: #0a0f14; --steam-blue: #1b2838; --sky: #66c0f4; }
+        
+        body { 
+            margin: 0; background: radial-gradient(circle at 50% 30%, #1c2e4a 0%, var(--bg) 80%);
+            color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh;
+        }
+
+        /* HEADER */
+        .top-bar { display: flex; justify-content: space-between; padding: 25px 50px; font-weight: bold; }
+        .text-blue { color: var(--sky); }
+
+        /* BIBLIOTHÈQUE */
+        .shelf { padding-left: 50px; margin-top: 20px; }
+        .section-label { font-size: 12px; letter-spacing: 2px; opacity: 0.6; text-transform: uppercase; }
+        .game-carousel { display: flex; gap: 20px; overflow-x: auto; padding: 20px 0; scrollbar-width: none; }
+
+        .game-card {
+            min-width: 220px; height: 320px; background: #1a222d; border-radius: 4px;
+            border: 3px solid transparent; transition: 0.2s; cursor: pointer;
+            display: flex; align-items: flex-end; padding: 15px; position: relative;
+            background-size: cover; background-position: center;
+        }
+
+        .game-card.featured { min-width: 500px; }
+
+        /* CADRE BLANC STEAM DECK */
+        .game-card:focus, .game-card.active {
+            border-color: white;
+            box-shadow: 0 0 25px rgba(255,255,255,0.3);
+            transform: scale(1.03);
+            outline: none;
+        }
+
+        /* L'ÉMULATEUR (OVERLAY) */
+        #emulator-overlay { position: fixed; inset: 0; background: black; z-index: 100; display: flex; flex-direction: column; }
+        .emu-header { background: var(--steam-blue); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--sky); }
+        #display { flex-grow: 1; width: 100%; height: 100%; }
+        .hidden { display: none !important; }
+
+        /* FOOTER */
+        .bottom-bar {
+            position: fixed; bottom: 0; width: 100%; height: 60px;
+            background: rgba(0,0,0,0.85); display: flex; justify-content: space-between;
+            align-items: center; padding: 0 40px; font-size: 11px; font-weight: bold; box-sizing: border-box;
+        }
+        .btn-hint { background: white; color: black; border-radius: 50%; padding: 2px 7px; margin-right: 5px; }
+    </style>
 </head>
-<body class="steam-deck-ui">
+<body>
 
     <header class="top-bar">
         <div class="brand italic">NOT<span class="text-blue">STEAM</span></div>
-        <div id="clock" class="time">00:00</div>
+        <div id="clock">00:00</div>
     </header>
 
     <main id="main-view">
         <section class="shelf">
-            <h2 class="section-label">RÉCENT</h2>
+            <h2 class="section-label">Récents</h2>
             <div class="game-carousel" id="game-list">
                 </div>
         </section>
@@ -24,22 +71,89 @@
     <div id="emulator-overlay" class="hidden">
         <div class="emu-header">
             <span id="playing-title">Chargement...</span>
-            <button onclick="location.reload()" class="exit-btn">QUITTER (ESC)</button>
+            <button onclick="location.reload()" style="background:#e11d48; color:white; border:none; padding:5px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">QUITTER (ESC)</button>
         </div>
         <div id="display"></div>
     </div>
 
     <footer class="bottom-bar">
-        <div class="hints">
-            <span class="badge">STEAM</span>
-            <span>MENU</span>
-        </div>
-        <div class="controller-hints">
-            <span><b class="btn-a">A</b> Sélectionner</span>
-            <span><b class="btn-b">B</b> Retour</span>
+        <div><span style="background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:20px;">STEAM</span> MENU</div>
+        <div>
+            <span><b class="btn-hint">A</b> SÉLECTIONNER</span> &nbsp;&nbsp;
+            <span><b class="btn-hint">B</b> RETOUR</span>
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        // 1. TA LISTE DE JEUX (Vérifie bien les noms des fichiers .nes)
+        const ROMS = [
+            { title: "All Hell Unleashed", core: "nes", path: "nes/All Hell Unleashed.nes", featured: true },
+            { title: "Backwards Quest", core: "nes", path: "nes/BackwardsQuest v18.nes" },
+            { title: "Mario Poker", core: "nes", path: "nes/Mario's Poker War (Unl).nes" },
+            { title: "Tower of Shlasca", core: "nes", path: "nes/Tower of Shlasca v1.0.nes" }
+        ];
+
+        let currentIndex = 0;
+        const gameList = document.getElementById('game-list');
+
+        // 2. CRÉATION DES CARTES
+        function init() {
+            ROMS.forEach((game, i) => {
+                const card = document.createElement('div');
+                card.className = `game-card ${game.featured ? 'featured' : ''}`;
+                card.tabIndex = 0;
+                card.innerHTML = `<div style="font-weight:bold; text-shadow:2px 2px 4px black;">${game.title}</div>`;
+                card.onclick = () => launch(game);
+                gameList.appendChild(card);
+            });
+            updateFocus();
+        }
+
+        function updateFocus() {
+            const cards = document.querySelectorAll('.game-card');
+            cards.forEach((c, i) => c.classList.toggle('active', i === currentIndex));
+            if(cards[currentIndex]) cards[currentIndex].focus();
+        }
+
+        // 3. LOGIQUE MANETTE
+        setInterval(() => {
+            const gp = navigator.getGamepads()[0];
+            if (!gp) return;
+
+            // D-Pad ou Joystick Gauche
+            if (gp.axes[0] > 0.5 || gp.buttons[15].pressed) { // Droite
+                if (currentIndex < ROMS.length - 1) { currentIndex++; updateFocus(); }
+            } else if (gp.axes[0] < -0.5 || gp.buttons[14].pressed) { // Gauche
+                if (currentIndex > 0) { currentIndex--; updateFocus(); }
+            }
+
+            // Bouton A pour lancer
+            if (gp.buttons[0].pressed) launch(ROMS[currentIndex]);
+        }, 150);
+
+        // 4. LANCEMENT ÉMULATEUR
+        function launch(game) {
+            document.getElementById('emulator-overlay').classList.remove('hidden');
+            document.getElementById('playing-title').innerText = "Lecture : " + game.title;
+
+            // Config
+            window.EJS_player = '#display';
+            window.EJS_core = game.core;
+            window.EJS_gameUrl = game.path;
+            window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+
+            // Chargement du script après la config pour éviter l'écran noir
+            const s = document.createElement('script');
+            s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+            document.head.appendChild(s);
+        }
+
+        // Horloge
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+        }, 1000);
+
+        init();
+    </script>
 </body>
 </html>
