@@ -1,59 +1,59 @@
-let focusIdx = 0;
-let isPlaying = false;
-const items = document.querySelectorAll('[data-focusable="true"]');
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('loader');
+    const clock = document.getElementById('clock');
+    const cards = document.querySelectorAll('.card');
+    const libraryView = document.getElementById('library-view');
+    const playerView = document.getElementById('player-view');
+    const exitBtn = document.getElementById('exit-btn');
 
-// Horloge temps réel
-const tick = () => document.getElementById('clock').innerText = new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
-setInterval(tick, 1000); tick();
+    // 1. Mise à jour Horloge
+    const updateTime = () => {
+        const now = new Date();
+        clock.innerText = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    };
+    setInterval(updateTime, 1000);
+    updateTime();
 
-function updateFocus() {
-    items.forEach((el, i) => {
-        el.classList.toggle('focused', i === focusIdx);
-        if (i === focusIdx) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    // 2. Gestion du chargement
+    setTimeout(() => {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 500);
+    }, 1000);
+
+    // 3. Fonction de lancement de jeu
+    const launchGame = (core, path, name) => {
+        libraryView.classList.add('hidden');
+        playerView.classList.remove('hidden');
+        document.getElementById('active-game-info').innerText = `SESSION EN COURS : ${name}`;
+
+        // EmulatorJS Configuration
+        window.EJS_player = '#emulator-target';
+        window.EJS_core = core;
+        window.EJS_gameUrl = path; 
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+
+        const script = document.createElement('script');
+        script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+        document.head.appendChild(script);
+    };
+
+    // 4. Événements Clic / Tactile
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            const core = card.getAttribute('data-core');
+            const path = card.getAttribute('data-path');
+            const name = card.querySelector('h3').innerText;
+            launchGame(core, path, name);
+        });
+
+        // Gestion Entrée au clavier pour accessibilité PC
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') card.click();
+        });
     });
-}
 
-// Fonction de lancement NotSteam
-function launch() {
-    const target = items[focusIdx];
-    const core = target.dataset.core;
-    const path = target.dataset.path; // Chemin vers ton dossier GitHub
-    const name = target.dataset.name;
-
-    isPlaying = true;
-    document.getElementById('library-screen').classList.add('hidden');
-    document.getElementById('player-screen').classList.remove('hidden');
-    document.getElementById('target-name').innerText = name;
-
-    // Configuration EmulatorJS
-    window.EJS_player = '#emu-box';
-    window.EJS_core = core;
-    window.EJS_gameUrl = path; // Le dossier correspondant dans ton dépôt
-    window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-
-    const s = document.createElement('script');
-    s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-    document.head.appendChild(s);
-}
-
-// Contrôles
-document.addEventListener('keydown', (e) => {
-    if (isPlaying) return;
-    if (e.key === "ArrowRight" && focusIdx < items.length - 1) focusIdx++;
-    if (e.key === "ArrowLeft" && focusIdx > 0) focusIdx--;
-    if (e.key === "Enter") launch();
-    updateFocus();
+    // 5. Bouton Quitter
+    exitBtn.addEventListener('click', () => {
+        window.location.reload(); // Recharge pour vider la mémoire de l'émulateur
+    });
 });
-
-// Support Manette
-window.addEventListener("gamepadconnected", () => {
-    setInterval(() => {
-        const gp = navigator.getGamepads()[0];
-        if (!gp || isPlaying) return;
-        if (gp.buttons[15].pressed) { focusIdx++; updateFocus(); } 
-        if (gp.buttons[14].pressed) { focusIdx--; updateFocus(); }
-        if (gp.buttons[0].pressed) launch();
-    }, 150);
-});
-
-updateFocus();
