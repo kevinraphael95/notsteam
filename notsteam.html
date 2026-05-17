@@ -2,83 +2,42 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NotSteam | Premium Retro Station</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NotSteam OS</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="steam-bg">
+<body class="steam-deck-ui">
 
-    <div id="loader" class="loader-overlay">
-        <div class="spinner"></div>
-    </div>
-
-    <header class="main-header">
-        <div class="logo">
-            <span class="logo-accent">NOT</span>STEAM
-        </div>
-        <div id="clock" class="clock">00:00</div>
+    <header class="top-bar">
+        <div class="brand italic">NOT<span class="text-blue">STEAM</span></div>
+        <div id="clock" class="time">00:00</div>
     </header>
 
-    <main class="content-wrapper">
-        <section id="library-view" class="view">
-            <div class="section-title">
-                <h2>MA BIBLIOTHÈQUE</h2>
-                <div class="status-badge">ONLINE</div>
-            </div>
-
-            <div class="game-grid scrollbar-custom">
-                <div class="card card-featured" tabindex="0" data-core="snes" data-path="snes/game.sfc">
-                    <div class="card-banner snes-bg"></div>
-                    <div class="card-info">
-                        <span class="system-tag">Super Nintendo</span>
-                        <h3>Super Mario World</h3>
-                        <div class="verified">✓ Verified</div>
-                    </div>
+    <main id="main-view">
+        <section class="shelf">
+            <h2 class="section-label">RÉCENT</h2>
+            <div class="game-carousel" id="game-list">
                 </div>
-
-                <div class="card" tabindex="0" data-core="nes" data-path="nes/game.nes">
-                    <div class="card-banner nes-bg"></div>
-                    <div class="card-info">
-                        <span class="system-tag">NES</span>
-                        <h3>8-Bit Classics</h3>
-                    </div>
-                </div>
-
-                <div class="card" tabindex="0" data-core="segaMD" data-path="megadrive/game.md">
-                    <div class="card-banner sega-bg"></div>
-                    <div class="card-info">
-                        <span class="system-tag">Sega MD</span>
-                        <h3>Sonic Edition</h3>
-                    </div>
-                </div>
-
-                <div class="card" tabindex="0" data-core="psx" data-path="psx/game.chd">
-                    <div class="card-banner psx-bg"></div>
-                    <div class="card-info">
-                        <span class="system-tag">PS One</span>
-                        <h3>3D Masterpiece</h3>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="player-view" class="view hidden">
-            <div class="player-container">
-                <div class="player-header">
-                    <div id="active-game-info">Chargement...</div>
-                    <button class="close-btn" id="exit-btn">QUITTER</button>
-                </div>
-                <div id="emulator-target"></div>
-            </div>
         </section>
     </main>
 
-    <footer class="main-footer">
-        <div class="controls-hint">
-            <span class="key-hint"><b>A</b> Sélectionner</span>
-            <span class="key-hint"><b>B</b> Retour</span>
+    <div id="emulator-overlay" class="hidden">
+        <div class="emu-header">
+            <span id="playing-title">Chargement...</span>
+            <button onclick="location.reload()" class="exit-btn">QUITTER (ESC)</button>
         </div>
-        <div class="version">v2.0.1 - PRO EDITION</div>
+        <div id="display"></div>
+    </div>
+
+    <footer class="bottom-bar">
+        <div class="hints">
+            <span class="badge">STEAM</span>
+            <span>MENU</span>
+        </div>
+        <div class="controller-hints">
+            <span><b class="btn-a">A</b> Sélectionner</span>
+            <span><b class="btn-b">B</b> Retour</span>
+        </div>
     </footer>
 
     <script src="script.js"></script>
