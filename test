@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SteamOS Pro Interface</title>
+    <style>
+        :root { 
+            --bg: #101418; --steam-blue: #1b2838; --accent: #66c0f4;
+            --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; height: 100vh; }
+        
+        /* Layout */
+        .top-bar { display: flex; justify-content: space-between; padding: 20px 40px; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+        .shelf { padding: 40px; }
+        
+        /* Carousel avec support tactile et manette */
+        .game-carousel { display: flex; gap: 24px; overflow-x: auto; padding: 20px 0; scroll-behavior: smooth; scrollbar-width: none; }
+        .game-carousel::-webkit-scrollbar { display: none; }
+
+        .game-card {
+            min-width: 200px; height: 280px; background: #2a3d4f; border-radius: 8px;
+            transition: var(--transition); border: 2px solid transparent;
+            display: flex; align-items: flex-end; padding: 20px; cursor: pointer;
+            position: relative; overflow: hidden; transform-origin: center;
+        }
+        .game-card.active { transform: scale(1.1); border-color: var(--accent); box-shadow: 0 0 40px rgba(102, 192, 244, 0.3); }
+
+        /* Emulator Layer */
+        #emulator-overlay { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; }
+        #display { width: 100%; height: 100%; }
+
+        .bottom-bar { position: fixed; bottom: 0; width: 100%; padding: 15px 40px; background: #0a0f14; display: flex; gap: 20px; font-size: 12px; }
+        .key { background: #fff; color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <div><strong>NOT</strong>STEAM</div>
+        <div id="clock">--:--</div>
+    </header>
+
+    <main class="shelf">
+        <h2 id="status">Chargement bibliothèque...</h2>
+        <div class="game-carousel" id="game-list"></div>
+    </main>
+
+    <div id="emulator-overlay">
+        <div id="display"></div>
+    </div>
+
+    <footer class="bottom-bar">
+        <span><span class="key">A</span> Lancer</span>
+        <span><span class="key">B</span> Quitter</span>
+    </footer>
+
+    <script>
+        const CONFIG = {
+            API: "https://api.github.com/repos/kevinraphael95/notsteam/contents/nes",
+            RAW: "https://raw.githubusercontent.com/kevinraphael95/notsteam/main/nes/"
+        };
+
+        let games = [], idx = 0, lastInput = 0;
+
+        async function init() {
+            try {
+                const res = await fetch(CONFIG.API);
+                games = (await res.json()).filter(f => f.name.endsWith('.nes'));
+                render();
+            } catch (e) { document.getElementById('status').innerText = "Erreur de connexion"; }
+        }
+
+        function render() {
+            const list = document.getElementById('game-list');
+            list.innerHTML = games.map((g, i) => `
+                <div class="game-card ${i === 0 ? 'active' : ''}" onclick="launch(${i})">
+                    ${g.name.replace('.nes', '')}
+                </div>
+            `).join('');
+            document.getElementById('status').innerText = "Ma Bibliothèque";
+        }
+
+        function launch(i) {
+            const game = games[i];
+            document.getElementById('emulator-overlay').style.display = 'block';
+            window.EJS_player = '#display';
+            window.EJS_core = 'nes';
+            window.EJS_gameUrl = CONFIG.RAW + encodeURIComponent(game.name);
+            window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+            const s = document.createElement('script');
+            s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+            document.head.appendChild(s);
+        }
+
+        // Boucle de contrôle haute performance
+        function update() {
+            const gp = navigator.getGamepads()[0];
+            const now = Date.now();
+            if (gp && now - lastInput > 200) {
+                if (gp.axes[0] > 0.5 || gp.buttons[15].pressed) move(1);
+                if (gp.axes[0] < -0.5 || gp.buttons[14].pressed) move(-1);
+                if (gp.buttons[0].pressed) launch(idx);
+            }
+            requestAnimationFrame(update);
+        }
+
+        function move(dir) {
+            const cards = document.querySelectorAll('.game-card');
+            cards[idx].classList.remove('active');
+            idx = Math.max(0, Math.min(games.length - 1, idx + dir));
+            cards[idx].classList.add('active');
+            cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'center' });
+            lastInput = Date.now();
+        }
+
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }, 1000);
+
+        init();
+        requestAnimationFrame(update);
+    </script>
+</body>
+</html>
