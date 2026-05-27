@@ -857,18 +857,23 @@ $('quit-btn').addEventListener('click', () => {
   // 1. Cacher l'overlay
   $('emulator-overlay').classList.add('hidden');
   
-  // 2. Arrêter l'émulateur s'il existe
-  if (window.EJS_emulator) {
-    window.EJS_emulator.stop(); // Arrête la boucle de jeu et le son
-    window.EJS_emulator = null;
+  // 2. Vider le contenu du lecteur pour arrêter le jeu et le son
+  const display = $('display');
+  display.innerHTML = '';
+  
+  // 3. Supprimer le script de l'émulateur s'il existe
+  const s = document.getElementById('ejs-script');
+  if (s) {
+    s.parentNode.removeChild(s);
   }
   
-  // 3. Nettoyer le conteneur et le script
-  $('display').innerHTML = '';
-  const s = document.getElementById('ejs-script');
-  if (s) s.remove();
+  // 4. Supprimer l'instance de l'émulateur si elle existe
+  if (window.EJS_emulator) {
+    window.EJS_emulator.stop();
+    delete window.EJS_emulator;
+  }
   
-  // 4. Supprimer les variables globales EJS
+  // 5. Nettoyer les variables globales
   ['EJS_player','EJS_core','EJS_gameUrl','EJS_pathtodata','EJS_startOnLoaded','EJS_gamepadEnabled']
     .forEach(k => delete window[k]);
 });
