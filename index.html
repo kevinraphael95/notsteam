@@ -849,24 +849,7 @@ function launchGame(i) {
   window.EJS_disableDatabases = true;
   window.EJS_gamepadEnabled = true;
   
-  window.EJS_defaultControls = {
-    0: {
-      0: 'BUTTON_2',
-      1: 'BUTTON_1',
-      2: 'SELECT',
-      3: 'START',
-      4: 'DPAD_UP',
-      5: 'DPAD_DOWN',
-      6: 'DPAD_LEFT',
-      7: 'DPAD_RIGHT'
-    }
-  };
-  
   const s = document.createElement('script');
-  s.id = 'ejs-script';
-  s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-  document.head.appendChild(s);
-  
   s.id = 'ejs-script';
   s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
   document.head.appendChild(s);
