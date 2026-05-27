@@ -854,28 +854,35 @@ function launchGame(i) {
 
 // ── QUIT
 $('quit-btn').addEventListener('click', () => {
-  // 1. Cacher l'overlay
+  // 1. Cacher l'overlay immédiatement
   $('emulator-overlay').classList.add('hidden');
   
-  // 2. Vider le contenu du lecteur pour arrêter le jeu et le son
+  // 2. Trouver et supprimer l'iframe créée par l'émulateur
+  // EmulatorJS insère souvent un iframe à l'intérieur du div #display
   const display = $('display');
-  display.innerHTML = '';
+  display.innerHTML = ''; 
   
-  // 3. Supprimer le script de l'émulateur s'il existe
+  // 3. Supprimer le script de l'émulateur du DOM pour arrêter le chargement
   const s = document.getElementById('ejs-script');
   if (s) {
-    s.parentNode.removeChild(s);
+    s.remove();
   }
   
-  // 4. Supprimer l'instance de l'émulateur si elle existe
+  // 4. Force l'arrêt de l'instance EJS si elle existe
   if (window.EJS_emulator) {
-    window.EJS_emulator.stop();
-    delete window.EJS_emulator;
+    try {
+      window.EJS_emulator.stop();
+    } catch (e) {
+      console.log("Impossible d'arrêter l'émulateur proprement, forçage du nettoyage.");
+    }
+    window.EJS_emulator = null;
   }
   
-  // 5. Nettoyer les variables globales
-  ['EJS_player','EJS_core','EJS_gameUrl','EJS_pathtodata','EJS_startOnLoaded','EJS_gamepadEnabled']
-    .forEach(k => delete window[k]);
+  // 5. Nettoyage radical des variables globales EmulatorJS
+  const ejsVars = ['EJS_player', 'EJS_core', 'EJS_gameUrl', 'EJS_pathtodata', 'EJS_startOnLoaded', 'EJS_gamepadEnabled', 'EJS_emulator'];
+  ejsVars.forEach(key => {
+    try { delete window[key]; } catch (e) { window[key] = null; }
+  });
 });
 
 // ── SEARCH
