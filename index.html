@@ -843,10 +843,30 @@ function launchGame(i) {
   window.EJS_core          = c.core;
   window.EJS_gameUrl       = RAW + c.folder + '/' + encodeURIComponent(g.file);
   window.EJS_pathtodata    = 'https://cdn.emulatorjs.org/stable/data/';
+  
   window.EJS_startOnLoaded = true;
+  
+  window.EJS_disableDatabases = true;
   window.EJS_gamepadEnabled = true;
-
+  
+  window.EJS_defaultControls = {
+    0: {
+      0: 'BUTTON_2',
+      1: 'BUTTON_1',
+      2: 'SELECT',
+      3: 'START',
+      4: 'DPAD_UP',
+      5: 'DPAD_DOWN',
+      6: 'DPAD_LEFT',
+      7: 'DPAD_RIGHT'
+    }
+  };
+  
   const s = document.createElement('script');
+  s.id = 'ejs-script';
+  s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+  document.head.appendChild(s);
+  
   s.id = 'ejs-script';
   s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
   document.head.appendChild(s);
@@ -933,7 +953,7 @@ window.addEventListener('gamepaddisconnected', () => {
 });
 function pollGamepad() {
   const gp = navigator.getGamepads ? navigator.getGamepads()[0] : null;
-  if (!gp || ($('emulator-overlay') && !$('emulator-overlay').classList.contains('hidden'))) return;
+  if (!gp) return;
   const anyPressed = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
   if (anyPressed) setInputMode('gamepad');
   const now = Date.now();
