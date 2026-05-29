@@ -4,12 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NotSteam OS</title>
-
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <div id="app"></div>
+  <div id="header">
+    <div id="logo">
+      <img src="notsteam.png" alt="NotSteam">
+      <span class="not">NOT</span>
+      <span class="dot">•</span>
+      <span class="steam">STEAM</span>
+    </div>
+  </div>
+
+  <div id="layout">
+
+    <div id="sidebar">
+      <div id="sidebar-label">Consoles</div>
+      <div id="console-list"></div>
+    </div>
+
+    <div id="main">
+
+      <div id="hero">
+        <div id="hero-console"></div>
+        <div id="hero-title"></div>
+        <div id="hero-meta"></div>
+        <button id="btn-launch">▶ Lancer</button>
+      </div>
+
+      <div id="games-area">
+        <div id="games-toolbar">
+          <div>
+            <span id="games-console-label"></span>
+            <span id="games-count"></span>
+          </div>
+          <input id="search" type="text" placeholder="Rechercher...">
+        </div>
+        <div id="games-list"></div>
+      </div>
+
+      <div id="display"></div>
+
+    </div>
+  </div>
+
+  <div id="statusbar">
+    <span>↕ Naviguer</span>
+    <span>↔ Console</span>
+    <span id="status-launch" style="display:none">↵ Lancer</span>
+    <span style="margin-left:auto" id="status-version">NotSteam OS v1.1 · kevinraphael95</span>
+  </div>
 
   <script type="module" src="./app.js"></script>
 
