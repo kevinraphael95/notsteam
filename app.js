@@ -5,18 +5,18 @@ import { GithubService }   from './services/github.service.js';
 import { EmulatorService } from './services/emulator.service.js';
 import { GamepadManager }  from './managers/gamepad.manager.js';
 
-const state   = new State();
-const emitter = new Emitter();
-const github  = new GithubService();
+const state    = new State();
+const emitter  = new Emitter();
+const github   = new GithubService();
 const emulator = new EmulatorService();
 const gamepad  = new GamepadManager();
 
 class App {
 
   constructor() {
-    this.selectedGame    = null;
-    this.currentConsole  = null;
-    this.allGames        = [];
+    this.selectedGame   = null;
+    this.currentConsole = null;
+    this.allGames       = [];
   }
 
   async boot() {
@@ -25,7 +25,6 @@ class App {
     await this.loadConsole(CONSOLES[0]);
   }
 
-  /* ---- SIDEBAR ---- */
   renderSidebar() {
     const list = document.getElementById('console-list');
     list.innerHTML = CONSOLES.map((c, i) => `
@@ -46,7 +45,6 @@ class App {
     });
   }
 
-  /* ---- LOAD CONSOLE ---- */
   async loadConsole(consoleData) {
     this.currentConsole = consoleData;
     this.selectedGame   = null;
@@ -80,7 +78,6 @@ class App {
     }
   }
 
-  /* ---- RENDER GAMES ---- */
   renderGames(games, consoleData) {
     const list = document.getElementById('games-list');
 
@@ -107,7 +104,6 @@ class App {
     });
   }
 
-  /* ---- SELECT GAME ---- */
   selectGame(game, el) {
     this.selectedGame = game;
 
@@ -125,29 +121,33 @@ class App {
     document.getElementById('btn-launch').onclick = () => this.launchGame(game, this.currentConsole);
   }
 
-  /* ---- LAUNCH GAME ---- */
   async launchGame(game, consoleData) {
     const gameUrl =
       `https://raw.githubusercontent.com/kevinraphael95/notsteam/main/` +
       `${consoleData.folder}/${encodeURIComponent(game.file)}`;
 
+    // Affiche #display vide (EmulatorJS va y injecter le canvas)
     const display = document.getElementById('display');
-    display.innerHTML = `<button id="btn-quit">✕ QUITTER</button>`;
     display.style.display = 'block';
-    document.getElementById('btn-quit').onclick = () => this.quitGame();
+
+    // Bouton quitter en dehors de #display
+    const existing = document.getElementById('btn-quit');
+    if (existing) existing.remove();
+    const quitBtn = document.createElement('button');
+    quitBtn.id = 'btn-quit';
+    quitBtn.textContent = '✕ QUITTER';
+    quitBtn.onclick = () => this.quitGame();
+    document.body.appendChild(quitBtn);
 
     await emulator.launch({ core: consoleData.core, gameUrl, mount: '#display' });
   }
 
-  /* ---- QUIT GAME ---- */
   quitGame() {
     emulator.destroy();
-    const display = document.getElementById('display');
-    display.style.display = 'none';
-    display.innerHTML = '';
+    document.getElementById('display').style.display = 'none';
+    document.getElementById('btn-quit')?.remove();
   }
 
-  /* ---- SEARCH ---- */
   bindSearch() {
     document.getElementById('search').addEventListener('input', e => {
       const q = e.target.value.toLowerCase().trim();
@@ -158,11 +158,10 @@ class App {
     });
   }
 
-  /* ---- UTILS ---- */
   formatSize(bytes) {
     if (!bytes) return '—';
-    if (bytes < 1024)        return `${bytes} B`;
-    if (bytes < 1048576)     return `${Math.round(bytes / 1024)} KB`;
+    if (bytes < 1024)    return `${bytes} B`;
+    if (bytes < 1048576) return `${Math.round(bytes / 1024)} KB`;
     return `${(bytes / 1048576).toFixed(1)} MB`;
   }
 
