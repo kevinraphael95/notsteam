@@ -12,7 +12,7 @@
     <div id="logo">
       <img src="notsteam.png" alt="NotSteam">
       <span class="not">NOT</span>
-      <span class="dot">•</span>
+      <span class="sep">•</span>
       <span class="steam">STEAM</span>
     </div>
   </div>
@@ -35,11 +35,13 @@
 
       <div id="games-area">
         <div id="games-toolbar">
-          <div>
+          <div id="toolbar-left">
             <span id="games-console-label"></span>
             <span id="games-count"></span>
           </div>
-          <input id="search" type="text" placeholder="Rechercher...">
+          <div id="search-wrap">
+            <input id="search" type="text" placeholder="Rechercher...">
+          </div>
         </div>
         <div id="games-list"></div>
       </div>
@@ -50,10 +52,10 @@
   </div>
 
   <div id="statusbar">
-    <span>↕ Naviguer</span>
-    <span>↔ Console</span>
-    <span id="status-launch" style="display:none">↵ Lancer</span>
-    <span style="margin-left:auto" id="status-version">NotSteam OS v1.1 · kevinraphael95</span>
+    <span class="status-item"><kbd>↑↓</kbd> Naviguer</span>
+    <span class="status-item"><kbd>←→</kbd> Console</span>
+    <span class="status-item" id="status-launch" style="display:none"><kbd>↵</kbd> Lancer</span>
+    <span id="status-version">NotSteam OS v1.1 · kevinraphael95</span>
   </div>
 
   <script type="module" src="./app.js"></script>
