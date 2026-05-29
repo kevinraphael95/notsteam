@@ -1,6 +1,6 @@
-import { State }        from './core/state.js';
-import { Emitter }      from './core/emitter.js';
-import { CONSOLES }     from './core/constants.js';
+import { State }           from './core/state.js';
+import { Emitter }         from './core/emitter.js';
+import { CONSOLES }        from './core/constants.js';
 import { GithubService }   from './services/github.service.js';
 import { EmulatorService } from './services/emulator.service.js';
 import { GamepadManager }  from './managers/gamepad.manager.js';
@@ -17,6 +17,7 @@ class App {
     this.selectedGame   = null;
     this.currentConsole = null;
     this.allGames       = [];
+    this.launching      = false; // verrou anti double-launch
   }
 
   async boot() {
@@ -110,8 +111,7 @@ class App {
     document.querySelectorAll('.game-row').forEach(r => r.classList.remove('selected'));
     el.classList.add('selected');
 
-    const hero = document.getElementById('hero');
-    hero.classList.add('visible');
+    document.getElementById('hero').classList.add('visible');
     document.getElementById('hero-console').textContent = this.currentConsole.name;
     document.getElementById('hero-title').textContent   = game.title;
     document.getElementById('hero-meta').innerHTML =
@@ -122,21 +122,23 @@ class App {
   }
 
   async launchGame(game, consoleData) {
+    if (this.launching) return;
+    this.launching = true;
+
     const gameUrl =
       `https://raw.githubusercontent.com/kevinraphael95/notsteam/main/` +
       `${consoleData.folder}/${encodeURIComponent(game.file)}`;
 
-    // Affiche #display vide (EmulatorJS va y injecter le canvas)
+    // Affiche l'overlay emulateur
     const display = document.getElementById('display');
+    display.innerHTML = '';
     display.style.display = 'block';
 
-    // Bouton quitter en dehors de #display
-    const existing = document.getElementById('btn-quit');
-    if (existing) existing.remove();
+    // Bouton quitter par-dessus
     const quitBtn = document.createElement('button');
-    quitBtn.id = 'btn-quit';
+    quitBtn.id        = 'btn-quit';
     quitBtn.textContent = '✕ QUITTER';
-    quitBtn.onclick = () => this.quitGame();
+    quitBtn.onclick   = () => this.quitGame();
     document.body.appendChild(quitBtn);
 
     await emulator.launch({ core: consoleData.core, gameUrl, mount: '#display' });
@@ -146,6 +148,7 @@ class App {
     emulator.destroy();
     document.getElementById('display').style.display = 'none';
     document.getElementById('btn-quit')?.remove();
+    this.launching = false;
   }
 
   bindSearch() {
@@ -166,7 +169,11 @@ class App {
   }
 
   escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return str
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
   }
 }
 
