@@ -17,7 +17,7 @@ class App {
     this.selectedGame   = null;
     this.currentConsole = null;
     this.allGames       = [];
-    this.launching      = false; // verrou anti double-launch
+    this.launching      = false;
   }
 
   async boot() {
@@ -67,11 +67,9 @@ class App {
       const games = await github.fetchGames(consoleData);
       this.allGames = games;
       state.set('games', games);
-
       const countEl = document.getElementById(`count-${consoleData.id}`);
       if (countEl) countEl.textContent = `${games.length} ROMs`;
       document.getElementById('games-count').textContent = `${games.length} jeux`;
-
       this.renderGames(games, consoleData);
     } catch (err) {
       list.innerHTML = `<div class="state-message">⚠ Erreur de chargement</div>`;
@@ -81,12 +79,10 @@ class App {
 
   renderGames(games, consoleData) {
     const list = document.getElementById('games-list');
-
     if (!games.length) {
       list.innerHTML = `<div class="state-message">Aucun jeu trouvé</div>`;
       return;
     }
-
     list.innerHTML = games.map((game, i) => `
       <div class="game-row" data-index="${i}">
         <div class="game-row-icon">▼</div>
@@ -97,26 +93,20 @@ class App {
         <div class="game-row-size">${this.formatSize(game.size)}</div>
       </div>
     `).join('');
-
     list.querySelectorAll('.game-row').forEach(el => {
-      el.addEventListener('click', () => {
-        this.selectGame(games[+el.dataset.index], el);
-      });
+      el.addEventListener('click', () => this.selectGame(games[+el.dataset.index], el));
     });
   }
 
   selectGame(game, el) {
     this.selectedGame = game;
-
     document.querySelectorAll('.game-row').forEach(r => r.classList.remove('selected'));
     el.classList.add('selected');
-
     document.getElementById('hero').classList.add('visible');
     document.getElementById('hero-console').textContent = this.currentConsole.name;
     document.getElementById('hero-title').textContent   = game.title;
     document.getElementById('hero-meta').innerHTML =
       `<span>📦 ${this.formatSize(game.size)}</span><span>🗂 ${this.escapeHtml(game.file)}</span>`;
-
     document.getElementById('status-launch').style.display = 'flex';
     document.getElementById('btn-launch').onclick = () => this.launchGame(game, this.currentConsole);
   }
@@ -129,24 +119,35 @@ class App {
       `https://raw.githubusercontent.com/kevinraphael95/notsteam/main/` +
       `${consoleData.folder}/${encodeURIComponent(game.file)}`;
 
-    // Affiche l'overlay emulateur
+    // Affiche #display avec dimensions explicites AVANT init EJS
     const display = document.getElementById('display');
-    display.innerHTML = '';
-    display.style.display = 'block';
+    display.style.cssText = `
+      display: block;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: #000;
+      z-index: 500;
+    `;
 
-    // Bouton quitter par-dessus
+    // Bouton quitter
+    document.getElementById('btn-quit')?.remove();
     const quitBtn = document.createElement('button');
-    quitBtn.id        = 'btn-quit';
+    quitBtn.id = 'btn-quit';
     quitBtn.textContent = '✕ QUITTER';
-    quitBtn.onclick   = () => this.quitGame();
+    quitBtn.onclick = () => this.quitGame();
     document.body.appendChild(quitBtn);
+
+    // Attend 2 frames que le browser calcule les dimensions
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     await emulator.launch({ core: consoleData.core, gameUrl, mount: '#display' });
   }
 
   quitGame() {
     emulator.destroy();
-    document.getElementById('display').style.display = 'none';
+    const display = document.getElementById('display');
+    display.style.cssText = 'display: none;';
     document.getElementById('btn-quit')?.remove();
     this.launching = false;
   }
@@ -169,11 +170,7 @@ class App {
   }
 
   escapeHtml(str) {
-    return str
-      .replace(/&/g,'&amp;')
-      .replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;');
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 }
 
