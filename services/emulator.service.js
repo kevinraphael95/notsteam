@@ -9,13 +9,15 @@ export class EmulatorService {
 
   async launch({ core, gameUrl, mount }) {
     this.destroy();
-    window.EJS_player = mount;
-    window.EJS_core = core;
-    window.EJS_gameUrl = gameUrl;
-    window.EJS_pathtodata = CONFIG.emulatorDataPath;
+
+    window.EJS_player        = mount;
+    window.EJS_core          = core;
+    window.EJS_gameUrl       = gameUrl;
+    window.EJS_pathtodata    = CONFIG.emulatorDataPath;
     window.EJS_startOnLoaded = true;
-    window.EJS_ready = () => { this.focusCanvas(); };
-    this.script = document.createElement('script');
+    window.EJS_ready         = () => this.focusCanvas();
+
+    this.script     = document.createElement('script');
     this.script.src = `${CONFIG.emulatorDataPath}loader.js`;
     document.body.appendChild(this.script);
     this.active = true;
@@ -36,5 +38,12 @@ export class EmulatorService {
         try { window.EJS_emulator.exit(); } catch {}
       }
     } catch {}
+
+    if (this.script?.parentNode) {
+      this.script.parentNode.removeChild(this.script);
+      this.script = null;
+    }
+
+    this.active = false;
   }
 }
