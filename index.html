@@ -533,11 +533,18 @@ function launchGame(i) {
   if (!g || !c) return;
 
   // Clean previous
+  try { if (window.EJS_emulator) window.EJS_emulator.exit(); } catch {}
   const prev = document.getElementById('ejs-script');
   if (prev) prev.remove();
-  $('display').innerHTML = '';
+  const oldDisplay = $('display');
+  const freshDisplay = document.createElement('div');
+  freshDisplay.id = 'display';
+  oldDisplay.parentNode.replaceChild(freshDisplay, oldDisplay);
+  document.querySelectorAll('[id^="emulator"], [class*="emulator"]').forEach(el => {
+    if (el.id !== 'emulator-overlay') el.remove();
+  });
   ['EJS_player','EJS_core','EJS_gameUrl','EJS_pathtodata','EJS_startOnLoaded','EJS_gamepadEnabled','EJS_emulator']
-    .forEach(k => delete window[k]);
+    .forEach(k => { try { delete window[k]; } catch {} });
 
   // Show overlay FIRST (display needs real dimensions)
   $('emulator-overlay').classList.remove('hidden');
@@ -565,13 +572,29 @@ function launchGame(i) {
 }
 
 $('quit-btn').addEventListener('click', () => {
+  // Stop audio context si dispo
   try { if (window.EJS_emulator) window.EJS_emulator.exit(); } catch {}
-  $('emulator-overlay').classList.add('hidden');
-  $('display').innerHTML = '';
+
+  // Nettoie le script loader
   const s = document.getElementById('ejs-script');
   if (s) s.remove();
+
+  // Détruit et recrée #display — coupe tous les listeners EJS
+  const old = $('display');
+  const fresh = document.createElement('div');
+  fresh.id = 'display';
+  old.parentNode.replaceChild(fresh, old);
+
+  // Nettoie tous les éléments parasites injectés par EJS hors #display
+  document.querySelectorAll('[id^="emulator"], [class*="emulator"]').forEach(el => {
+    if (el.id !== 'emulator-overlay') el.remove();
+  });
+
+  // Reset globals EJS
   ['EJS_player','EJS_core','EJS_gameUrl','EJS_pathtodata','EJS_startOnLoaded','EJS_gamepadEnabled','EJS_emulator']
-    .forEach(k => delete window[k]);
+    .forEach(k => { try { delete window[k]; } catch {} });
+
+  $('emulator-overlay').classList.add('hidden');
 });
 
 $('search-input').addEventListener('input', () => {
