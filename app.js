@@ -30,7 +30,7 @@ class App {
     const list = document.getElementById('console-list');
     list.innerHTML = CONSOLES.map((c, i) => `
       <div class="console-item ${i === 0 ? 'active' : ''}" data-id="${c.id}">
-        <img class="console-thumb" src="${c.thumb}" alt="${c.name}" onerror="this.style.display='none'">
+        <img class="console-thumb" src="https://raw.githubusercontent.com/kevinraphael95/notsteam/main/${c.thumb}" alt="${c.name}" onerror="this.style.display='none'">
         <div>
           <div class="console-name">${c.name}</div>
           <div class="console-count" id="count-${c.id}">—</div>
