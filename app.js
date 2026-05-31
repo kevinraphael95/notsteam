@@ -30,7 +30,7 @@ class App {
     const list = document.getElementById('console-list');
     list.innerHTML = CONSOLES.map((c, i) => `
       <div class="console-item ${i === 0 ? 'active' : ''}" data-id="${c.id}">
-        <div class="console-icon">${c.icon}</div>
+        <img class="console-thumb" src="${c.thumb}" alt="${c.name}" onerror="this.style.display='none'">
         <div>
           <div class="console-name">${c.name}</div>
           <div class="console-count" id="count-${c.id}">—</div>
@@ -85,7 +85,7 @@ class App {
     }
     list.innerHTML = games.map((game, i) => `
       <div class="game-row" data-index="${i}">
-        <div class="game-row-icon">▼</div>
+        <div class="game-row-icon">▶</div>
         <div class="game-row-info">
           <div class="game-row-title">${this.escapeHtml(game.title)}</div>
           <div class="game-row-sub">${consoleData.name} · ${this.escapeHtml(game.file)}</div>
@@ -93,6 +93,7 @@ class App {
         <div class="game-row-size">${this.formatSize(game.size)}</div>
       </div>
     `).join('');
+
     list.querySelectorAll('.game-row').forEach(el => {
       el.addEventListener('click', () => this.selectGame(games[+el.dataset.index], el));
     });
@@ -102,11 +103,13 @@ class App {
     this.selectedGame = game;
     document.querySelectorAll('.game-row').forEach(r => r.classList.remove('selected'));
     el.classList.add('selected');
+
     document.getElementById('hero').classList.add('visible');
     document.getElementById('hero-console').textContent = this.currentConsole.name;
     document.getElementById('hero-title').textContent   = game.title;
     document.getElementById('hero-meta').innerHTML =
       `<span>📦 ${this.formatSize(game.size)}</span><span>🗂 ${this.escapeHtml(game.file)}</span>`;
+
     document.getElementById('status-launch').style.display = 'flex';
     document.getElementById('btn-launch').onclick = () => this.launchGame(game, this.currentConsole);
   }
@@ -119,17 +122,6 @@ class App {
       `https://raw.githubusercontent.com/kevinraphael95/notsteam/main/` +
       `${consoleData.folder}/${encodeURIComponent(game.file)}`;
 
-    // Affiche #display avec dimensions explicites AVANT init EJS
-    const display = document.getElementById('display');
-    display.style.cssText = `
-      display: block;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: #000;
-      z-index: 500;
-    `;
-
     // Bouton quitter
     document.getElementById('btn-quit')?.remove();
     const quitBtn = document.createElement('button');
@@ -138,16 +130,11 @@ class App {
     quitBtn.onclick = () => this.quitGame();
     document.body.appendChild(quitBtn);
 
-    // Attend 2 frames que le browser calcule les dimensions
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-    await emulator.launch({ core: consoleData.core, gameUrl, mount: '#display' });
+    await emulator.launch({ core: consoleData.core, gameUrl });
   }
 
   quitGame() {
     emulator.destroy();
-    const display = document.getElementById('display');
-    display.style.cssText = 'display: none;';
     document.getElementById('btn-quit')?.remove();
     this.launching = false;
   }
