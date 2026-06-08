@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NotSteam OS</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,6 +18,7 @@
   <div id="header-right">
     <div class="online"><div class="online-dot"></div>EN LIGNE</div>
     <div id="clock">00:00</div>
+    <div id="gp-indicator" title="Manette"></div>
   </div>
 </header>
 
@@ -26,6 +26,12 @@
 <div id="screen-consoles">
   <div id="consoles-title">CHOISIR UNE CONSOLE</div>
   <div id="console-grid"></div>
+  <div class="hint-bar">
+    <span class="hint"><kbd>↑↓←→</kbd> Naviguer</span>
+    <span class="hint"><kbd>↵</kbd> Ouvrir</span>
+    <span class="hint"><kbd id="gp-hint-a" style="color:var(--red)">A</kbd> Ouvrir</span>
+    <span class="hint"><kbd id="gp-hint-lr" style="color:#58a6ff">LB/RB</kbd> Console</span>
+  </div>
 </div>
 
 <!-- ÉCRAN JEUX -->
@@ -55,8 +61,9 @@
 </div>
 
 <footer id="statusbar">
-  <span class="status-item"><kbd>↑↓←→</kbd> Naviguer</span>
-  <span class="status-item"><kbd>↵</kbd> Lancer</span>
+  <span class="status-item" id="hint-nav"><kbd>↑↓</kbd> Naviguer</span>
+  <span class="status-item" id="hint-console"><kbd>←→</kbd> Console</span>
+  <span class="status-item" id="hint-launch"><kbd>↵</kbd> Lancer</span>
   <span class="status-item"><kbd>/</kbd> Chercher</span>
   <span id="status-version">NotSteam OS v2.0 · kevinraphael95</span>
 </footer>
@@ -66,8 +73,8 @@
 (function tick(){
   const d = new Date();
   document.getElementById('clock').textContent =
-    String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-  setTimeout(tick, 1000);
+    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  setTimeout(tick,1000);
 })();
 </script>
 </body>
