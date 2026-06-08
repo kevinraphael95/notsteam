@@ -2,531 +2,73 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NotSteam OS</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-button,input{font-family:inherit;border:none;background:none;cursor:pointer;outline:none}
-
-:root {
-  --bg:      #090b12;
-  --s1:      #0e1018;
-  --s2:      #141620;
-  --s3:      #1a1d28;
-  --border:  rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.14);
-  --text:    #e8ecf8;
-  --sub:     #8892b0;
-  --muted:   #424866;
-  --acc:     #ff4438;
-  --cyan:    #26c6d8;
-  --green:   #2ed47a;
-  --mono:    'DM Mono', monospace;
-  --disp:    'Barlow Condensed', sans-serif;
-  --r:       6px;
-  --sidebar: 220px;
-  --topbar:  52px;
-  --botbar:  38px;
-}
-
-html,body{height:100%;overflow:hidden}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--disp);
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
-
-body::after {
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:
-    linear-gradient(rgba(61,139,255,0.015) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(61,139,255,0.015) 1px,transparent 1px);
-  background-size:48px 48px;
-}
-
-/* ── TOPBAR ── */
-.topbar {
-  height:var(--topbar);
-  background:var(--s1);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;flex-shrink:0;position:relative;z-index:200;
-}
-
-.logo {
-  display:flex;align-items:center;gap:8px;
-  font-family:var(--disp);font-size:18px;font-weight:800;
-  letter-spacing:5px;text-transform:uppercase;
-}
-.logo img{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(255,68,56,0.7))}
-.logo-not{color:var(--acc)}
-.logo-dot{
-  width:5px;height:5px;border-radius:50%;
-  background:var(--cyan);box-shadow:0 0 8px var(--cyan);
-  animation:pulse 2.4s ease-in-out infinite;
-}
-.logo-steam{color:var(--text)}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
-
-.topbar-right{display:flex;align-items:center;gap:16px;font-family:var(--mono);font-size:11px;color:var(--sub)}
-.online{display:flex;align-items:center;gap:5px}
-.online-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2.4s ease-in-out infinite}
-#clock{color:var(--text);font-size:14px;font-weight:500;letter-spacing:1px}
-
-.burger{
-  display:none;flex-direction:column;gap:5px;
-  padding:6px;border-radius:var(--r);
-  background:var(--s2);border:1px solid var(--border);
-}
-.burger span{width:18px;height:2px;background:var(--sub);border-radius:2px;transition:all .2s}
-
-/* ── LAYOUT ── */
-.layout{display:flex;flex:1;overflow:hidden;position:relative;z-index:1}
-
-/* ── SIDEBAR ── */
-.sidebar {
-  width:var(--sidebar);
-  background:var(--s1);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
-  flex-shrink:0;overflow-y:auto;
-  scrollbar-width:none;
-  transition:transform .25s cubic-bezier(.4,0,.2,1);
-}
-.sidebar::-webkit-scrollbar{display:none}
-
-.sidebar-section{
-  padding:16px 14px 8px;
-  font-family:var(--mono);font-size:9px;
-  letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);
-}
-
-.console-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;cursor:pointer;
-  border-left:3px solid transparent;
-  transition:background .1s,border-color .1s;
-  position:relative;
-}
-.console-item:hover{background:rgba(255,255,255,.04)}
-.console-item.active{
-  background:rgba(255,255,255,.06);
-  border-left-color:var(--ci-color,var(--acc));
-}
-.console-item.active .console-name{color:var(--text)}
-
-.ci-icon{
-  width:36px;height:36px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;flex-shrink:0;
-  border:1px solid rgba(255,255,255,.06);
-}
-.ci-name-wrap{flex:1;min-width:0}
-.console-name{font-size:14px;font-weight:600;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.console-count{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px}
-
-/* ── CONTENT ── */
-.content{flex:1;display:flex;flex-direction:column;overflow:hidden}
-
-/* ── HERO ── */
-.hero{
-  height:210px;flex-shrink:0;
-  position:relative;overflow:hidden;
-  border-bottom:1px solid var(--border);
-}
-.hero-bg{position:absolute;inset:0;transition:background .4s}
-.hero-noise{
-  position:absolute;inset:0;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
-  background-size:200px;opacity:.4;
-}
-.hero-fade{
-  position:absolute;inset:0;
-  background:linear-gradient(105deg,rgba(9,11,18,1) 28%,rgba(9,11,18,.8) 55%,rgba(9,11,18,.1) 100%);
-}
-.hero-fade-bottom{
-  position:absolute;bottom:0;left:0;right:0;height:60px;
-  background:linear-gradient(to top,var(--bg),transparent);
-}
-.hero-body{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:22px 26px;
-}
-.hero-eyebrow{
-  display:flex;align-items:center;gap:8px;margin-bottom:6px;
-}
-.hero-badge{
-  font-family:var(--mono);font-size:9px;letter-spacing:2px;
-  text-transform:uppercase;font-weight:600;
-  padding:3px 8px;border-radius:4px;
-  background:rgba(255,68,56,.15);color:var(--acc);
-  border:1px solid rgba(255,68,56,.3);
-  transition:all .25s;
-}
-.hero-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(255,68,56,.3),transparent);max-width:80px}
-
-.hero-title{
-  font-size:34px;font-weight:800;line-height:1;
-  letter-spacing:.5px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:540px;margin-bottom:10px;
-  text-shadow:0 2px 20px rgba(0,0,0,.5);
-}
-.hero-meta{
-  display:flex;gap:14px;align-items:center;
-  font-family:var(--mono);font-size:10px;color:var(--sub);
-  margin-bottom:16px;
-}
-.hero-meta-sep{opacity:.25}
-.hero-meta-icon{font-size:11px;margin-right:3px;opacity:.6}
-
-.btn-launch{
-  display:none;align-items:center;gap:8px;
-  background:var(--acc);color:#fff;
-  padding:9px 22px;border-radius:var(--r);
-  font-family:var(--disp);font-size:15px;font-weight:700;letter-spacing:2px;
-  text-transform:uppercase;
-  box-shadow:0 0 0 1px rgba(255,68,56,.4),0 4px 24px rgba(255,68,56,.3);
-  transition:background .12s,transform .12s,box-shadow .12s;
-  width:fit-content;
-}
-.btn-launch.show{display:flex}
-.btn-launch:hover{background:#e0302a;transform:translateY(-1px);box-shadow:0 0 0 1px rgba(255,68,56,.6),0 6px 30px rgba(255,68,56,.45)}
-.btn-launch:active{transform:translateY(0)}
-.btn-launch-icon{font-size:13px;opacity:.9}
-
-.hero-loadbar{
-  position:absolute;bottom:0;left:0;height:2px;
-  background:linear-gradient(90deg,var(--acc),var(--cyan));
-  box-shadow:0 0 8px var(--acc);
-  border-radius:0 1px 1px 0;transition:width .2s;
-}
-
-/* ── TOOLBAR ── */
-.toolbar{
-  height:40px;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;
-  border-bottom:1px solid var(--border);
-  background:rgba(14,16,24,.9);
-  flex-shrink:0;gap:10px;
-  backdrop-filter:blur(8px);
-}
-.toolbar-left{display:flex;align-items:center;gap:10px;min-width:0}
-.tb-title{
-  font-size:11px;font-weight:600;letter-spacing:2.5px;
-  text-transform:uppercase;color:var(--sub);
-  font-family:var(--mono);white-space:nowrap;
-}
-.tb-sep{color:var(--muted);font-family:var(--mono);font-size:12px}
-.tb-count{font-family:var(--mono);font-size:10px;color:var(--muted)}
-
-.search-box{
-  display:flex;align-items:center;gap:7px;
-  background:var(--s3);border:1px solid var(--border);
-  border-radius:var(--r);padding:5px 10px;
-  transition:border-color .15s,background .15s;
-  flex-shrink:0;
-}
-.search-box:focus-within{border-color:rgba(255,68,56,.35);background:var(--s2)}
-.search-icon{color:var(--muted);font-size:13px;user-select:none}
-.search-box input{
-  background:none;color:var(--text);
-  font-family:var(--mono);font-size:11px;width:140px;
-}
-.search-box input::placeholder{color:var(--muted)}
-
-/* ── GAME LIST ── */
-.game-list{
-  flex:1;overflow-y:auto;
-  scrollbar-width:thin;
-  scrollbar-color:rgba(255,255,255,.06) transparent;
-}
-.game-list::-webkit-scrollbar{width:4px}
-.game-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.06);border-radius:2px}
-
-.game-row{
-  display:flex;align-items:center;gap:12px;
-  padding:9px 20px;
-  border-bottom:1px solid rgba(255,255,255,.035);
-  border-left:3px solid transparent;
-  cursor:pointer;transition:background .08s,border-color .08s;
-}
-.game-row:hover{background:rgba(255,255,255,.04)}
-.game-row.focused{
-  background:rgba(255,255,255,.06);
-  border-left-color:var(--gr-color,var(--acc));
-}
-
-.gr-num{
-  font-family:var(--mono);font-size:9px;color:var(--muted);
-  width:22px;text-align:right;flex-shrink:0;user-select:none;
-}
-.gr-thumb{
-  width:38px;height:28px;border-radius:5px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;flex-shrink:0;
-  border:1px solid rgba(255,255,255,.07);
-  transition:border-color .1s;
-}
-.game-row.focused .gr-thumb{border-color:rgba(255,255,255,.18)}
-.gr-info{flex:1;min-width:0}
-.gr-name{
-  font-size:14px;font-weight:600;color:#9daac8;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  transition:color .08s;
-}
-.game-row.focused .gr-name{color:var(--text)}
-.gr-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px}
-.gr-size{font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0}
-.gr-arrow{
-  font-size:12px;color:var(--muted);flex-shrink:0;
-  opacity:0;transition:opacity .1s,transform .1s;
-}
-.game-row:hover .gr-arrow,.game-row.focused .gr-arrow{opacity:1;transform:translateX(2px)}
-
-.empty-state{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  height:100%;gap:10px;color:var(--muted);
-}
-.empty-icon{font-size:40px;opacity:.15}
-.empty-title{font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:var(--mono)}
-.empty-sub{font-family:var(--mono);font-size:10px;opacity:.4}
-
-/* ── LOADING ── */
-.state-loading{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:14px;padding:40px 0;color:var(--muted);font-family:var(--mono);font-size:11px;
-}
-.spinner{
-  width:18px;height:18px;
-  border:2px solid rgba(255,255,255,.08);
-  border-top-color:var(--acc);
-  border-radius:50%;animation:spin .7s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── BOTTOMBAR ── */
-.bottombar{
-  height:var(--botbar);
-  background:var(--s1);border-top:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;flex-shrink:0;
-  font-family:var(--mono);font-size:10px;color:var(--muted);
-  position:relative;z-index:200;
-}
-.hints{display:flex;gap:14px;align-items:center}
-.hint{display:flex;align-items:center;gap:5px}
-.hkey{
-  background:var(--s3);border:1px solid var(--border2);
-  border-radius:3px;padding:1px 6px;font-size:10px;
-  color:rgba(255,255,255,.4);font-weight:600;
-  min-width:20px;text-align:center;
-}
-.version{font-size:9px;opacity:.25;letter-spacing:1px}
-
-/* ── EMULATOR OVERLAY ── */
-#emulator-overlay{
-  position:fixed;inset:0;background:#000;
-  z-index:1000;display:flex;flex-direction:column;
-  animation:fadeIn .18s ease;
-}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-#emulator-overlay.hidden{display:none!important}
-
-.emu-bar{
-  height:46px;
-  background:rgba(8,10,16,.98);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;flex-shrink:0;z-index:10;
-}
-.emu-left{display:flex;align-items:center;gap:10px}
-.emu-badge{
-  font-family:var(--mono);font-size:9px;letter-spacing:2px;
-  font-weight:600;padding:3px 8px;border-radius:4px;
-}
-.emu-title{font-size:15px;font-weight:700;letter-spacing:.5px}
-.emu-sep{color:var(--border2);margin:0 2px}
-
-.btn-quit{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(255,68,56,.1);color:var(--acc);
-  border:1px solid rgba(255,68,56,.25);border-radius:var(--r);
-  padding:7px 16px;
-  font-family:var(--disp);font-weight:700;font-size:13px;
-  letter-spacing:1.5px;text-transform:uppercase;
-  transition:background .12s,border-color .12s;
-}
-.btn-quit:hover{background:rgba(255,68,56,.22);border-color:rgba(255,68,56,.5)}
-
-#display{
-  flex:1;width:100%;min-height:0;overflow:hidden;
-  position:relative;background:#000;
-}
-
-/* ── MOBILE SIDEBAR OVERLAY ── */
-.sidebar-overlay{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.7);z-index:150;
-  backdrop-filter:blur(4px);
-}
-
-/* ── RESPONSIVE ── */
-@media(max-width:700px){
-  :root{--topbar:48px;--botbar:42px}
-  .burger{display:flex}
-  .topbar-hints{display:none}
-  .sidebar{
-    position:fixed;top:0;left:0;bottom:0;width:240px;
-    z-index:300;transform:translateX(-100%);
-    box-shadow:4px 0 24px rgba(0,0,0,.6);
-  }
-  .sidebar.open{transform:translateX(0)}
-  .sidebar-overlay.open{display:block}
-  .hero{height:170px}
-  .hero-title{font-size:26px;max-width:100%}
-  .hero-body{padding:16px 16px}
-  .hero-meta{display:none!important}
-  .btn-launch{padding:8px 18px;font-size:13px}
-  .toolbar{padding:0 12px}
-  .search-box input{width:110px}
-  .game-row{padding:10px 14px}
-  .gr-size,.gr-num{display:none}
-  .gr-name{font-size:13px}
-  .bottombar{padding:0 14px}
-  .hints{gap:10px}
-  .hint:nth-child(n+3){display:none}
-  .emu-bar{padding:0 12px;height:44px}
-  .emu-sep,.emu-title{display:none}
-  .version{display:none}
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- TOPBAR -->
-<header class="topbar">
-  <div class="logo">
+<header id="header">
+  <div id="logo">
     <img src="notsteam.png" alt="" onerror="this.style.display='none'">
-    <span class="logo-not">NOT</span>
-    <div class="logo-dot"></div>
-    <span class="logo-steam">STEAM</span>
+    <span class="not">NOT</span>
+    <div class="dot"></div>
+    <span class="steam">STEAM</span>
   </div>
-  <div class="topbar-right">
-    <button class="burger" id="burger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="online topbar-hints"><div class="online-dot"></div>EN LIGNE</div>
-    <div id="clock" class="topbar-hints">00:00</div>
+  <div id="header-right">
+    <div class="online"><div class="online-dot"></div>EN LIGNE</div>
+    <div id="clock">00:00</div>
   </div>
 </header>
 
-<!-- LAYOUT -->
-<div class="layout">
-
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-  <!-- SIDEBAR -->
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-section">Consoles</div>
-    <div id="console-list"></div>
-  </nav>
-
-  <!-- CONTENT -->
-  <div class="content">
-
-    <!-- HERO -->
-    <div class="hero">
-      <div class="hero-bg" id="hero-bg"></div>
-      <div class="hero-noise"></div>
-      <div class="hero-fade"></div>
-      <div class="hero-fade-bottom"></div>
-      <div class="hero-body">
-        <div class="hero-eyebrow">
-          <div class="hero-badge" id="hero-badge">NOTSTEAM OS</div>
-          <div class="hero-line"></div>
-        </div>
-        <div class="hero-title" id="hero-title">Choisir un jeu</div>
-        <div class="hero-meta" id="hero-meta" style="display:none">
-          <span><span class="hero-meta-icon">◈</span><span id="hero-size">—</span></span>
-          <span class="hero-meta-sep">·</span>
-          <span id="hero-file">—</span>
-        </div>
-        <button class="btn-launch" id="btn-launch">
-          <span class="btn-launch-icon">▶</span> LANCER
-        </button>
-      </div>
-      <div class="hero-loadbar" id="loadbar" style="width:0%"></div>
-    </div>
-
-    <!-- TOOLBAR -->
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <span class="tb-title" id="tb-title">—</span>
-        <span class="tb-sep">·</span>
-        <span class="tb-count" id="tb-count"></span>
-      </div>
-      <div class="search-box">
-        <span class="search-icon">⌕</span>
-        <input type="text" id="search" placeholder="Rechercher…" autocomplete="off" spellcheck="false">
-      </div>
-    </div>
-
-    <!-- GAME LIST -->
-    <div class="game-list" id="game-list"></div>
-
-  </div>
+<!-- ÉCRAN CONSOLES -->
+<div id="screen-consoles">
+  <div id="consoles-title">CHOISIR UNE CONSOLE</div>
+  <div id="console-grid"></div>
 </div>
 
-<!-- BOTTOMBAR -->
-<footer class="bottombar">
-  <div class="hints topbar-hints">
-    <div class="hint"><span class="hkey">↑↓</span>Naviguer</div>
-    <div class="hint"><span class="hkey">←→</span>Console</div>
-    <div class="hint"><span class="hkey">↵</span>Lancer</div>
-    <div class="hint"><span class="hkey">/</span>Chercher</div>
-  </div>
-  <span class="version">NotSteam OS v3.0 · kevinraphael95</span>
-</footer>
-
-<!-- EMULATOR OVERLAY -->
-<div id="emulator-overlay" class="hidden">
-  <div class="emu-bar">
-    <div class="emu-left">
-      <span class="emu-badge" id="emu-badge-bar"></span>
-      <span class="emu-sep">|</span>
-      <span class="emu-title" id="emu-title"></span>
+<!-- ÉCRAN JEUX -->
+<div id="screen-games" class="hidden">
+  <div id="games-topbar">
+    <button id="btn-back">‹ Retour</button>
+    <div id="games-title"></div>
+    <div id="games-count"></div>
+    <div id="search-wrap">
+      <span>⌕</span>
+      <input id="search" type="text" placeholder="Rechercher…" autocomplete="off">
     </div>
-    <button class="btn-quit" id="quit-btn">✕ Quitter</button>
+  </div>
+  <div id="game-list"></div>
+</div>
+
+<!-- OVERLAY EMULATEUR -->
+<div id="emulator-overlay" class="hidden">
+  <div id="emu-bar">
+    <div id="emu-left">
+      <span id="emu-badge"></span>
+      <span id="emu-title"></span>
+    </div>
+    <button id="quit-btn">✕ QUITTER</button>
   </div>
   <div id="display"></div>
 </div>
 
+<footer id="statusbar">
+  <span class="status-item"><kbd>↑↓←→</kbd> Naviguer</span>
+  <span class="status-item"><kbd>↵</kbd> Lancer</span>
+  <span class="status-item"><kbd>/</kbd> Chercher</span>
+  <span id="status-version">NotSteam OS v2.0 · kevinraphael95</span>
+</footer>
+
 <script type="module" src="app.js"></script>
-
 <script>
-/* Clock */
 (function tick(){
+  const d = new Date();
   document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-  setTimeout(tick,1000);
+    String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  setTimeout(tick, 1000);
 })();
-
-/* Mobile sidebar */
-const burger  = document.getElementById('burger');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('sidebar-overlay');
-function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open')}
-burger.addEventListener('click',()=>{sidebar.classList.toggle('open');overlay.classList.toggle('open')});
-overlay.addEventListener('click',closeSidebar);
 </script>
-
 </body>
 </html>
